@@ -35,6 +35,10 @@ header {
   box-shadow: 0 10px 30px rgba(30, 60, 114, 0.3);
 }
 
+header {
+  position: relative;
+}
+
 header h1 {
   font-size: 32px;
   font-weight: 700;
@@ -46,6 +50,29 @@ header p {
   font-size: 14px;
   opacity: 0.9;
   font-weight: 300;
+}
+
+.btn-logout {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-logout:hover {
+  background: rgba(255,255,255,0.28);
+  border-color: rgba(255,255,255,0.7);
+  transform: none;
+  box-shadow: none;
 }
 
 /* ===== SEÇÕES PRINCIPAIS ===== */
@@ -581,6 +608,7 @@ footer {
   <header>
     <h1>📦 Conferência de Pedidos</h1>
     <p>Sistema de gestão de leitor DUN para conferência automática de caixas</p>
+    <button class="btn-logout" onclick="fazerLogout()">🚪 Sair</button>
   </header>
 
   <!-- MENU DE NAVEGAÇÃO ENTRE TELAS -->
@@ -4793,6 +4821,16 @@ const _EH = {
   u: '08936e53cd8b59d262e7cd0f95268dd438612961a469f2f1ed8837e59dedd968',
   p: '12e06fd9e0fccc130b3cef993d0e0fbf94bc54054446bcbd43f296906d9a68a4'
 };
+
+function fazerLogout() {
+  if (!confirm('Deseja sair do sistema?')) return;
+  sessionStorage.removeItem('_auth');
+  document.getElementById('loginUsuario').value = '';
+  document.getElementById('loginSenha').value = '';
+  document.getElementById('loginErro').style.display = 'none';
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('loginUsuario').focus();
+}
 
 async function fazerLogin() {
   const MAX_TENTATIVAS = 5;
