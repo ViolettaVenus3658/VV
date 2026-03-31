@@ -446,10 +446,135 @@ footer {
     transform: translateY(0);
   }
 }
+
+/* ===== LOGIN OVERLAY ===== */
+#login-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-box {
+  background: white;
+  padding: 45px 40px 35px;
+  border-radius: 16px;
+  width: 360px;
+  max-width: 95vw;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+  animation: fadeIn 0.4s ease;
+}
+
+.login-box h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e3c72;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.login-box .login-subtitle {
+  font-size: 13px;
+  color: #7f8c8d;
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.login-box label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #34495e;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 7px;
+  display: block;
+}
+
+.login-box input[type="text"],
+.login-box input[type="password"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #f8f9fa;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  margin-bottom: 16px;
+}
+
+.login-box input[type="text"]:focus,
+.login-box input[type="password"]:focus {
+  outline: none;
+  border-color: #2a5298;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.12);
+}
+
+.login-box .btn-login {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(42, 82, 152, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-top: 6px;
+}
+
+.login-box .btn-login:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px rgba(42, 82, 152, 0.45);
+}
+
+.login-box .btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#loginErro {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: #fadbd8;
+  border-left: 3px solid #e74c3c;
+  border-radius: 6px;
+  color: #c0392b;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+}
 </style>
 </head>
 
 <body>
+
+<!-- ===== TELA DE LOGIN ===== -->
+<div id="login-overlay">
+  <div class="login-box">
+    <h2>🔐 Conferência de Pedidos</h2>
+    <p class="login-subtitle">Informe suas credenciais para continuar</p>
+    <div>
+      <label for="loginUsuario">Usuário</label>
+      <input type="text" id="loginUsuario" autocomplete="username" placeholder="Digite seu usuário">
+    </div>
+    <div>
+      <label for="loginSenha">Senha</label>
+      <input type="password" id="loginSenha" autocomplete="current-password" placeholder="Digite sua senha">
+    </div>
+    <button class="btn-login" id="btnLogin" onclick="fazerLogin()">Entrar</button>
+    <div id="loginErro"></div>
+  </div>
+</div>
 
 <div class="page-wrapper">
   <!-- HEADER -->
@@ -3752,8 +3877,8 @@ function getUrlWiser() {
 document.getElementById('btnAbrirLinkManual').addEventListener('click', function() {
   const url = getUrlWiser();
   if (url) {
-    window.open(url, '_blank');
-    document.getElementById('buscaStatus').innerHTML = '✅ Link aberto. Faça download e importe acima.';
+    window.open(url, '_blank', 'noopener,noreferrer');
+    document.getElementById('buscaStatus').textContent = '✅ Link aberto. Faça download e importe acima.';
   }
 });
 
@@ -3858,6 +3983,15 @@ function mostrarErro(msg) {
   }, 3000);
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function atualizarTabela() {
   const tbody = document.getElementById("tabelaConsolidada");
   tbody.innerHTML = "";
@@ -3869,14 +4003,14 @@ function atualizarTabela() {
 
   for (let sku in consolidado) {
     const i = consolidado[sku];
-    tbody.innerHTML += `
-      <tr>
-        <td><strong>${sku}</strong></td>
-        <td>${i.descricao}</td>
-        <td style="text-align: center;"><strong>${i.caixas}</strong></td>
-        <td style="text-align: center;"><strong>${i.quantidade}</strong></td>
-      </tr>
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(sku)}</strong></td>
+      <td>${escapeHtml(i.descricao)}</td>
+      <td style="text-align: center;"><strong>${escapeHtml(i.caixas)}</strong></td>
+      <td style="text-align: center;"><strong>${escapeHtml(i.quantidade)}</strong></td>
     `;
+    tbody.appendChild(tr);
   }
 }
 
@@ -3979,20 +4113,21 @@ function mostrarDivergencias() {
     let checkboxHtml = '—';
     if (diff !== 0) {
       const checkedAttr = ajustado ? 'checked' : '';
-      checkboxHtml = `<input type="checkbox" class="ajuste-checkbox" data-sku="${sku}" ${checkedAttr}>`;
+      checkboxHtml = `<input type="checkbox" class="ajuste-checkbox" data-sku="${escapeHtml(sku)}" ${checkedAttr}>`;
     }
 
-    tbody.innerHTML += `
-      <tr class="${classeExibida}">
-        <td><strong>${sku}</strong></td>
-        <td>${pedidoConsolidado[sku].descricao}</td>
-        <td style="text-align: center;">${pedidoQtd}</td>
-        <td style="text-align: center;">${bipadoQtd}</td>
-        <td style="text-align: center;"><strong>${diff}</strong></td>
-        <td style="text-align: center;"><strong>${statusExibido}</strong></td>
-        <td style="text-align: center;">${checkboxHtml}</td>
-      </tr>
+    const tr = document.createElement('tr');
+    tr.className = classeExibida;
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(sku)}</strong></td>
+      <td>${escapeHtml(pedidoConsolidado[sku].descricao)}</td>
+      <td style="text-align: center;">${escapeHtml(pedidoQtd)}</td>
+      <td style="text-align: center;">${escapeHtml(bipadoQtd)}</td>
+      <td style="text-align: center;"><strong>${escapeHtml(diff)}</strong></td>
+      <td style="text-align: center;"><strong>${escapeHtml(statusExibido)}</strong></td>
+      <td style="text-align: center;">${checkboxHtml}</td>
     `;
+    tbody.appendChild(tr);
   }
   
   document.getElementById("divergencias").scrollIntoView({ behavior: 'smooth' });
@@ -4472,11 +4607,11 @@ function atualizarListaCadastros() {
         <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
             <div>
-              <strong style="color: #1e3c72;">SKU:</strong> ${sku}<br>
-              <strong style="color: #1e3c72;">DUN:</strong> ${dun}
+              <strong style="color: #1e3c72;">SKU:</strong> ${escapeHtml(sku)}<br>
+              <strong style="color: #1e3c72;">DUN:</strong> ${escapeHtml(dun)}
             </div>
             <div>
-              <strong style="color: #1e3c72;">Quantidade:</strong> ${qtd} un.
+              <strong style="color: #1e3c72;">Quantidade:</strong> ${escapeHtml(qtd)} un.
             </div>
           </div>
           <button onclick="excluirCadastro(${index})" style="background: #e74c3c; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; font-size: 14px; font-weight: 700; transition: background 0.2s;" title="Excluir cadastro" onmouseover="this.style.background='#c0392b'" onmouseout="this.style.background='#e74c3c'">🗑️</button>
@@ -4634,6 +4769,84 @@ function exportarCadastrosJSON() {
 (function() {
   carregarCadastrosAdicionados();
 })();
+
+// ========== AUTENTICAÇÃO ==========
+(function verificarSessao() {
+  if (sessionStorage.getItem('_auth') === '1') {
+    document.getElementById('login-overlay').style.display = 'none';
+  }
+})();
+
+document.getElementById('loginUsuario').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') document.getElementById('loginSenha').focus();
+});
+document.getElementById('loginSenha').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') fazerLogin();
+});
+
+async function _hash(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+const _EH = {
+  u: '08936e53cd8b59d262e7cd0f95268dd438612961a469f2f1ed8837e59dedd968',
+  p: '12e06fd9e0fccc130b3cef993d0e0fbf94bc54054446bcbd43f296906d9a68a4'
+};
+
+async function fazerLogin() {
+  const MAX_TENTATIVAS = 5;
+  const BLOQUEIO_MS = 30000;
+
+  const btn = document.getElementById('btnLogin');
+  const erroDiv = document.getElementById('loginErro');
+
+  const bloqueadoAte = parseInt(sessionStorage.getItem('_bloc') || '0');
+  if (bloqueadoAte > Date.now()) {
+    const s = Math.ceil((bloqueadoAte - Date.now()) / 1000);
+    erroDiv.textContent = `Muitas tentativas. Aguarde ${s}s.`;
+    erroDiv.style.display = 'block';
+    return;
+  }
+
+  const usuario = document.getElementById('loginUsuario').value;
+  const senha = document.getElementById('loginSenha').value;
+
+  if (!usuario || !senha) {
+    erroDiv.textContent = 'Preencha usuário e senha.';
+    erroDiv.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verificando...';
+
+  try {
+    const [hu, hp] = await Promise.all([_hash(usuario), _hash(senha)]);
+    if (hu === _EH.u && hp === _EH.p) {
+      sessionStorage.setItem('_auth', '1');
+      sessionStorage.removeItem('_tent');
+      sessionStorage.removeItem('_bloc');
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('dunInput').focus();
+    } else {
+      const tent = parseInt(sessionStorage.getItem('_tent') || '0') + 1;
+      sessionStorage.setItem('_tent', tent.toString());
+      if (tent >= MAX_TENTATIVAS) {
+        sessionStorage.setItem('_bloc', (Date.now() + BLOQUEIO_MS).toString());
+        erroDiv.textContent = 'Conta bloqueada por 30 segundos.';
+      } else {
+        erroDiv.textContent = `Usuário ou senha incorretos. (${tent}/${MAX_TENTATIVAS})`;
+      }
+      erroDiv.style.display = 'block';
+      document.getElementById('loginSenha').value = '';
+      document.getElementById('loginSenha').focus();
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+  }
+}
 </script>
 
 </body>
