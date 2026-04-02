@@ -3753,6 +3753,8 @@ let pedidos = [];
 let consolidado = {};
 let ajustes = new Set();
 let cadastrosAdicionados = []; // Array para armazenar novos cadastros
+let audioContext = null;
+let ultimoSom = { erro: 0, aviso: 0 };
 
 const DB_NAME = 'ConferenciaDB';
 const STORE_NAME = 'pedidosStore';
@@ -3976,7 +3978,8 @@ function processarDUN(dunLido) {
   const dunExtraido = extrairDUN(dunLido);
 
   if (!caixa) {
-    mostrarErro(`❌ DUN ${dunExtraido || dunLido} não encontrado`);
+    tocarSom('erro');
+    mostrarErro(`❌ SKU não cadastrado (${dunExtraido || dunLido})`);
     return;
   }
 
@@ -3984,6 +3987,11 @@ function processarDUN(dunLido) {
   const qtdCaixa = Number(caixa.F) || 0;
   const pedidoItem = pedidos.find(p => String(p.F) === pedidoNum && String(p.H) === sku);
   const descricao = pedidoItem ? (pedidoItem.J || 'Sem descrição') : "SKU não pertence ao pedido";
+
+  if (!pedidoItem) {
+    tocarSom('aviso');
+    mostrarErro(`⚠️ SKU ${sku} não pertence ao pedido`);
+  }
 
   if (!consolidado[sku]) {
     consolidado[sku] = {
@@ -4001,6 +4009,51 @@ function processarDUN(dunLido) {
   
   atualizarTabela();
   atualizarStats();
+}
+
+function tocarSom(tipo) {
+  const agora = Date.now();
+  if ((tipo === 'erro' || tipo === 'aviso') && agora - (ultimoSom[tipo] || 0) < 1200) {
+    return;
+  }
+
+  if (tipo === 'erro' || tipo === 'aviso') {
+    ultimoSom[tipo] = agora;
+  }
+
+  if (!audioContext) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    audioContext = new Ctx();
+  }
+
+  const tocarTom = (frequencia, inicio, duracao, volume) => {
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.type = 'square';
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.frequency.setValueAtTime(frequencia, inicio);
+    gain.gain.setValueAtTime(volume, inicio);
+    gain.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
+    osc.start(inicio);
+    osc.stop(inicio + duracao);
+  };
+
+  const t0 = audioContext.currentTime;
+
+  if (tipo === 'aviso') {
+    // Aviso: 2 bipes médios e curtos.
+    tocarTom(700, t0, 0.11, 0.16);
+    tocarTom(560, t0 + 0.14, 0.11, 0.14);
+    return;
+  }
+
+  // Erro: 3 bipes mais graves para ficar bem evidente.
+  tocarTom(340, t0, 0.13, 0.19);
+  tocarTom(280, t0 + 0.16, 0.13, 0.17);
+  tocarTom(220, t0 + 0.32, 0.14, 0.16);
 }
 
 function mostrarErro(msg) {
@@ -4086,19 +4139,23 @@ function calcularTotaisBipados(pedidoNum) {
   const bipadosAjustados = {};
 
   for (let sku in consolidado) {
+    const itemForaPedido = !pedidoConsolidado[sku];
+    if (itemForaPedido && ajustes.has(sku)) {
+      // Fora da composição: só sai do relatório quando descontabilizado.
+      continue;
+    }
+
     let qtdBipada = consolidado[sku].quantidade;
     let caixasBipadas = consolidado[sku].caixas;
-    
-    if (pedidoConsolidado[sku]) {
-      const pedidoQtd = pedidoConsolidado[sku].quantidade;
-      if (ajustes.has(sku)) {
-        qtdBipada = pedidoQtd;
-        const caixaInfo = caixas.find(c => String(c.D).trim() === sku);
-        const qtdPorCaixa = caixaInfo ? (Number(caixaInfo.F) || 1) : 1;
-        caixasBipadas = Math.ceil(qtdBipada / qtdPorCaixa);
-      }
+
+    const pedidoQtd = pedidoConsolidado[sku]?.quantidade || 0;
+    if (!itemForaPedido && ajustes.has(sku)) {
+      qtdBipada = pedidoQtd;
+      const caixaInfo = caixas.find(c => String(c.D).trim() === sku);
+      const qtdPorCaixa = caixaInfo ? (Number(caixaInfo.F) || 1) : 1;
+      caixasBipadas = Math.ceil(qtdBipada / qtdPorCaixa);
     }
-    
+
     bipadosAjustados[sku] = {
       descricao: consolidado[sku].descricao,
       caixas: caixasBipadas,
@@ -4157,6 +4214,31 @@ function mostrarDivergencias() {
     `;
     tbody.appendChild(tr);
   }
+
+  for (let sku in consolidado) {
+    if (pedidoConsolidado[sku]) continue;
+
+    const bipadoQtd = consolidado[sku].quantidade;
+    const diff = ajustes.has(sku) ? 0 : bipadoQtd;
+    const statusExibido = ajustes.has(sku) ? 'OK' : 'SOBRA';
+    const classeExibida = ajustes.has(sku) ? 'status-ok' : 'status-sobra';
+    const textoBotao = ajustes.has(sku) ? 'Recontabilizar' : 'Descontabilizar';
+
+    const tr = document.createElement('tr');
+    tr.className = classeExibida;
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(sku)}</strong></td>
+      <td>${escapeHtml(consolidado[sku].descricao)}</td>
+      <td style="text-align: center;">0</td>
+      <td style="text-align: center;">${escapeHtml(bipadoQtd)}</td>
+      <td style="text-align: center;"><strong>${escapeHtml(diff)}</strong></td>
+      <td style="text-align: center;"><strong>${escapeHtml(statusExibido)}</strong></td>
+      <td style="text-align: center;">
+        <button type="button" class="btn-warning ajuste-extra-btn" data-sku="${escapeHtml(sku)}">${textoBotao}</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
   
   document.getElementById("divergencias").scrollIntoView({ behavior: 'smooth' });
 }
@@ -4174,6 +4256,22 @@ document.getElementById('tabelaDivergencias').addEventListener('change',function
       mostrarDivergencias();
     }
   }
+});
+
+document.getElementById('tabelaDivergencias').addEventListener('click', function(e) {
+  const botao = e.target.closest('.ajuste-extra-btn');
+  if (!botao) return;
+
+  const sku = botao.dataset.sku;
+  if (!sku) return;
+
+  if (ajustes.has(sku)) {
+    ajustes.delete(sku);
+  } else {
+    ajustes.add(sku);
+  }
+
+  mostrarDivergencias();
 });
 
 function exportarConferencia() {
