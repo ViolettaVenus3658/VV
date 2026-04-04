@@ -24,25 +24,6 @@ body {
 
 /* ===== CONTAINER PRINCIPAL ===== */
 .page-wrapper { max-width: 1300px; margin: 0 auto; }
-.top-nav-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-.date-range-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-.cache-actions {
-  margin-top: 8px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
 
 /* ===== HEADER ===== */
 header {
@@ -147,9 +128,7 @@ label {
 
 input[type="text"],
 input[type="date"],
-input[type="file"],
-input[type="password"],
-select {
+input[type="file"] {
   width: 100%;
   padding: 12px 14px;
   border: 2px solid #ecf0f1;
@@ -161,9 +140,7 @@ select {
 }
 
 input[type="text"]:focus,
-input[type="date"]:focus,
-input[type="password"]:focus,
-select:focus {
+input[type="date"]:focus {
   outline: none;
   border-color: #2a5298;
   background: white;
@@ -386,12 +363,6 @@ button {
   border: 1px solid #ecf0f1;
 }
 
-.table-scroll {
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
 .table-header {
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   color: white;
@@ -402,7 +373,6 @@ button {
 
 table {
   width: 100%;
-  min-width: 640px;
   border-collapse: collapse;
   background: white;
 }
@@ -610,189 +580,6 @@ footer {
   font-weight: 600;
   display: none;
 }
-
-@media (max-width: 768px) {
-  body {
-    padding: 16px 12px 28px;
-  }
-
-  header {
-    padding: 24px 18px 18px;
-    margin-bottom: 24px;
-  }
-
-  header h1 {
-    font-size: 24px;
-    line-height: 1.2;
-    margin-bottom: 10px;
-    padding-right: 0;
-  }
-
-  header p {
-    font-size: 13px;
-    line-height: 1.5;
-    padding-right: 0;
-  }
-
-  .btn-logout {
-    position: static;
-    width: 100%;
-    margin-top: 16px;
-    justify-content: center;
-  }
-
-  .top-nav-grid,
-  .main-grid,
-  .date-range-grid,
-  .button-group {
-    grid-template-columns: 1fr;
-  }
-
-  .main-grid {
-    gap: 18px;
-    margin-bottom: 24px;
-  }
-
-  .section {
-    padding: 20px 16px;
-    border-radius: 10px;
-  }
-
-  .section-title {
-    font-size: 16px;
-    margin-bottom: 18px;
-    padding-bottom: 12px;
-    line-height: 1.3;
-  }
-
-  .cache-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .status-badge,
-  .btn-warning {
-    width: 100%;
-    text-align: center;
-  }
-
-  button {
-    min-height: 46px;
-    font-size: 13px;
-    letter-spacing: 0.3px;
-  }
-
-  .btn-download {
-    padding: 14px 16px;
-  }
-
-  .stats-container {
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 22px;
-  }
-
-  .stat-card {
-    padding: 16px 12px;
-  }
-
-  .stat-value {
-    font-size: 26px;
-  }
-
-  .table-header,
-  .divergencia-header {
-    padding: 16px;
-    font-size: 15px;
-  }
-
-  th,
-  td {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
-
-  .empty-message {
-    padding: 28px 14px;
-  }
-
-  .login-box {
-    padding: 28px 20px 24px;
-    width: min(100%, 380px);
-  }
-
-  .login-box h2 {
-    font-size: 20px;
-  }
-
-  footer {
-    margin-top: 28px;
-    padding: 16px 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    padding: 12px 10px 24px;
-  }
-
-  header {
-    padding: 20px 14px 14px;
-  }
-
-  header h1 {
-    font-size: 22px;
-  }
-
-  .section {
-    padding: 16px 14px;
-  }
-
-  .section-title {
-    gap: 8px;
-  }
-
-  label {
-    font-size: 12px;
-  }
-
-  input[type="text"],
-  input[type="date"],
-  input[type="file"],
-  input[type="password"],
-  select {
-    font-size: 16px;
-    padding: 12px;
-  }
-
-  .stats-container {
-    grid-template-columns: 1fr;
-  }
-
-  .dun-counter,
-  .status-badge {
-    width: 100%;
-    text-align: center;
-  }
-
-  .table-container {
-    border-radius: 8px;
-  }
-
-  .table-header,
-  .divergencia-header {
-    white-space: normal;
-    line-height: 1.35;
-  }
-
-  table {
-    min-width: 560px;
-  }
-
-  .login-box {
-    padding: 24px 16px 20px;
-  }
-}
 </style>
 </head>
 
@@ -825,7 +612,7 @@ footer {
   </header>
 
   <!-- MENU DE NAVEGAÇÃO ENTRE TELAS -->
-  <div class="top-nav-grid">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px;">
     <button class="btn-primary" onclick="irParaTela('tela-conferencia')" style="width: 100%; padding: 15px; font-size: 15px;" id="btnTelaPrincipal">🔍 Conferência</button>
     <button class="btn-primary" onclick="irParaTela('tela-cadastro')" style="width: 100%; padding: 15px; font-size: 15px;">➕ Novo Cadastro</button>
   </div>
@@ -843,7 +630,7 @@ footer {
           <label>Base de Pedidos (Upload Manual)</label>
           <input type="file" id="filePedidos" accept=".xlsx, .xls">
           <div class="form-hint">Colunas esperadas: F (Pedido) | H (SKU) | J (Descrição) | L (Quantidade)</div>
-          <div class="cache-actions">
+          <div style="margin-top: 8px;">
             <span class="status-badge" id="cacheIndicatorPedidos" style="display: none;">✅ Em Cache</span>
             <button class="btn-warning" id="btnLimparCache" style="display: none; margin-left: 10px;">🗑️ Limpar Cache</button>
           </div>
@@ -852,7 +639,7 @@ footer {
         <div class="info-card">
           <strong>📥 Download do Wiser</strong>
           <div style="margin: 12px 0 0 0;">
-            <div class="date-range-grid">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
               <div>
                 <label style="margin-bottom: 5px;">Data Inicial</label>
                 <input type="date" id="dataInicial">
@@ -914,45 +701,41 @@ footer {
   <!-- TABELA DE CONSOLIDAÇÃO -->
   <div class="table-container">
     <div class="table-header">Consolidação por SKU</div>
-    <div class="table-scroll">
-      <table>
-        <thead>
-          <tr>
-            <th>SKU</th>
-            <th>Descrição</th>
-            <th style="text-align: center;">Caixas</th>
-            <th style="text-align: center;">Qtd Total</th>
-          </tr>
-        </thead>
-        <tbody id="tabelaConsolidada">
-          <tr>
-            <td colspan="4" class="empty-message">Nenhum item escaneado ainda</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>SKU</th>
+          <th>Descrição</th>
+          <th style="text-align: center;">Caixas</th>
+          <th style="text-align: center;">Qtd Total</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaConsolidada">
+        <tr>
+          <td colspan="4" class="empty-message">Nenhum item escaneado ainda</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- TABELA DE DIVERGÊNCIAS -->
   <div id="divergencias">
     <div class="divergencia-header">Análise de Divergências</div>
     <div class="table-container">
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>SKU</th>
-              <th>Descrição</th>
-              <th style="text-align: center;">Pedido</th>
-              <th style="text-align: center;">Escaneado</th>
-              <th style="text-align: center;">Diferença</th>
-              <th style="text-align: center;">Status</th>
-              <th style="text-align: center;">Ajuste</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaDivergencias"></tbody>
-        </table>
-      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>SKU</th>
+            <th>Descrição</th>
+            <th style="text-align: center;">Pedido</th>
+            <th style="text-align: center;">Escaneado</th>
+            <th style="text-align: center;">Diferença</th>
+            <th style="text-align: center;">Status</th>
+            <th style="text-align: center;">Ajuste</th>
+          </tr>
+        </thead>
+        <tbody id="tabelaDivergencias"></tbody>
+      </table>
     </div>
   </div>
   </div>
